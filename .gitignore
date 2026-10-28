@@ -97,6 +97,7 @@
 /git-ls-remote
 /git-ls-tree
 /git-mailinfo
+/git-memory
 /git-mailsplit
 /git-maintenance
 /git-merge
