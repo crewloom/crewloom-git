@@ -4,7 +4,14 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 version=$(cat CREWLOOM_VERSION)
 tag="crewloom-git-v$version"
-repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+# Resolve from origin, the remote this script pushes to. gh repo view picks the
+# upstream git/git remote in this fork.
+repo=$(git remote get-url origin | sed -E 's#^(git@github\.com:|ssh://git@github\.com/|https://github\.com/)##; s#\.git$##')
+case "$repo" in
+*/*/*|*:*|'') echo >&2 "origin is not a GitHub repository: $repo"; exit 1;;
+*/*) ;;
+*) echo >&2 "origin is not a GitHub repository: $repo"; exit 1;;
+esac
 branch=$(git branch --show-current)
 # GitHub registers push runs a few seconds to minutes after the push, so
 # poll for them. Filtering by ref keeps the tag check from reusing branch runs.
