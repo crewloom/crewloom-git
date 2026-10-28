@@ -1,0 +1,115 @@
+git-memory(1)
+=============
+
+NAME
+----
+git-memory - Retain private versioned project context without a model service
+
+SYNOPSIS
+--------
+[verse]
+'git memory init' --worktree -- <tracked-path-or-directory>...
+'git memory capture' [--actor <id>] [--model <id>] [--session <id>] [--task <id>]
+'git memory context' [--query <literal>] [--max-bytes <n>] [--no-refresh]
+'git memory history' [--limit <n>]
+'git memory diff' [--from <full-snapshot-id>] [--to <full-snapshot-id>]
+'git memory note' --text <candidate> [--snapshot <full-snapshot-id>] -- <source-path>...
+'git memory status'
+'git memory watch' [--interval-ms <n>] [--count <n>]
+
+DESCRIPTION
+-----------
+This fork adds native C implementation inside Git. Memory operations use Git's
+object and reference APIs directly; capture and retrieval do not execute a shell,
+a model, or another Git process. No executable is installed over the system Git.
+
+Memory is disabled until `init --worktree` selects literal tracked files or
+tracked directory prefixes. It retains raw worktree content and staged index
+content separately. Untracked files are not included. Path globs are not accepted.
+The worktree and the source repository's HEAD, index and object database are not
+modified by memory capture. Each linked worktree has a separate local store.
+
+The store is an independent owner-only bare repository in the current Git
+directory's `memory-store` directory, without alternates or source refs pointing
+to it. Source clone, push --mirror and bundle do not transfer this store.
+Copies or backups of the Git directory can contain it. Removing a linked worktree
+can remove its store. Do not select sensitive files: raw historical content can
+contain secrets even after it disappears from the worktree. Known sensitive names
+are rejected; this is not a comprehensive secret scanner. There is no automatic
+expiry, export or secure erasure in this release.
+
+AUTOMATIC OBSERVATION
+---------------------
+`watch` captures selected saved edits while the foreground process is running.
+The polling interval is 100 through 60000 milliseconds (default 1000). A positive
+`--count` bounds the number of observations; zero continues until interrupted.
+Stop normally with an operating-system signal or Ctrl-C. A second watcher is
+refused. Git lockfile cleanup handles ordinary termination. SIGKILL or a crashed
+machine can leave a lock requiring explicit inspection and recovery; never remove
+a lock merely because its process identifier appears old.
+
+`context` refreshes before retrieval unless `--no-refresh` is selected. Other Git
+commands do not automatically run memory capture. No claim is made to capture
+transient edits between observations or a globally atomic multi-file state against
+external writers. Inputs changing during an observed read or index/HEAD drift
+cause an explicit failure rather than partial reference publication.
+
+OUTPUT AND KNOWLEDGE LIMITS
+---------------------------
+Structured output is JSON schema 1. Identifiers and machine fields stay in English.
+`--language ar` selects Arabic diagnostics; `--language en` is the default. Examples
+and the bilingual scope guide are in `Documentation/crewloom/`.
+
+Context matches a literal substring in paths or UTF-8 content, returns bounded
+source excerpts with object IDs, byte offsets and line numbers, and reports
+omissions and truncated sources. The byte budget includes the serialized JSON and
+newline; default 16384, accepted range 1024 through 2097152. Binary source bytes are
+retained in snapshots but omitted from textual context. Invalid UTF-8 paths are
+rejected. There is no syntax/semantic parser or complete dependency graph in this
+release. Content objects are deduplicated; output history is ordered by parents,
+not by clock timestamps. There is no tokenizer, cost or quota measurement.
+
+`diff` reports exact bounding replacement spans in bytes. Disjoint edits in one
+file can share a larger bounding span: this is not a minimal edit script or a
+Unicode grapheme index. Added/deleted paths are explicit; rename detection is not
+implemented. Historical bytes remain accessible with ordinary Git object readers
+pointed explicitly at the private store.
+
+Notes are untrusted candidate data, never instructions, verified behavior, or
+host authority. Their declared source content is retained through tree links.
+`--snapshot` binds a note to the snapshot originally supplied to its author; if
+omitted it binds to the latest recorded snapshot without refreshing live source.
+This default is not evidence that any model saw those bytes. Comparing declared
+sources can report `inputs_unchanged`, `changed`, or `missing`; unchanged inputs do
+not establish claim truth or dependency completeness. Absence/impact claims need
+additional query and environment dependencies not implemented in this release.
+
+ATTRIBUTION
+-----------
+Host-provided actor/model/session/task fields are limited UTF-8 declarations,
+not authenticated identities. Missing values are `unknown`. Observation time is
+recorded separately from actual edit time, which is unknown. A running watcher
+cannot infer which model edited an external file. No per-model retention of a
+previous context packet is assumed: a new consumer must request sufficient data.
+
+SUPPORTED BOUNDARY
+------------------
+SHA-1 and SHA-256 repositories and selected regular files are supported. Selected
+symlink bytes are read without following their target. Conflicted index entries,
+intent-to-add, sparse/skip-worktree entries and submodule gitlinks are rejected.
+Partial-clone materialization and arbitrary environment-redirected object/index
+stores are outside this release. Native raw reads do not run clean/smudge filters.
+
+Capture has finite file/count/aggregate limits recorded in the private config.
+Bad configuration, foreign/copied store identity, symlinked store structure,
+unsupported inputs, lock contention and output-budget failures are explicit.
+Git itself may terminate on corrupt objects; corrupted stores are not silently
+recreated, relabelled as absent, or overwritten.
+
+SEE ALSO
+--------
+linkgit:git[1], linkgit:git-diff[1], linkgit:gitformat-index[5]
+
+GIT
+---
+Part of this Crewloom Git fork.

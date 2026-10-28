@@ -1,6 +1,6 @@
 # Native project memory in Git: implementation plan
 
-Status: frozen first-release scope after the scientific council; implementation not yet verified.
+Status: scope frozen after the scientific council; first implementation is built and its local acceptance suite passed. Remote release remains pending CI.
 Upstream: Git v2.56.0, commit a018953688f1b10bddf91bff8747068f5f4746a4.
 Branch: crewloom-main. The system Git executable is not modified or installed over.
 
@@ -99,3 +99,14 @@ shared interfaces with exclusive file ownership. No UI/site change is required f
 
 Tests not run or unavailable sanitizer/build variants must remain explicit in release notes.
 No release with known failing acceptance checks or failing remote CI is considered complete.
+
+## Implementation result (2026-10-28)
+
+The native builtin and documentation are implemented in this fork. The local
+`DEVELOPER=1` build passed; `scripts/test-memory.sh` passed all 23 behavior tests,
+9 safety tests, and 674 selected upstream compatibility tests (706 total). `git
+diff --check` passed. Local sanitizer and Windows runs were not performed. Release
+CI must pass and be checked through `gh` before calling this implementation released.
+The first release makes no measured quota-saving, intelligence, tokenization, or
+semantic-dependency claim. See `Documentation/crewloom/RELEASE-NOTES.md` for exact
+scope and verification.

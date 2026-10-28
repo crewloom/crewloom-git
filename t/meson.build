@@ -145,6 +145,8 @@ integration_tests = [
   't0410-partial-clone.sh',
   't0411-clone-from-partial.sh',
   't0450-txt-doc-vs-help.sh',
+  't0451-memory.sh',
+  't0452-memory-safety.sh',
   't0500-progress-display.sh',
   't0600-reffiles-backend.sh',
   't0601-reffiles-pack-refs.sh',

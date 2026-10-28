@@ -62,6 +62,20 @@ struct repo_config_values *repo_config_values(struct repository *repo)
 	return &repo->config_values_private_;
 }
 
+int repo_odb_compression_level(struct repository *repo)
+{
+	if (!repo->initialized)
+		BUG("ODB config from uninitialized repository");
+	return repo->config_values_private_.zlib_compression_level;
+}
+
+enum object_creation_mode repo_odb_creation_mode(struct repository *repo)
+{
+	if (!repo->initialized)
+		BUG("ODB config from uninitialized repository");
+	return repo->config_values_private_.object_creation_mode;
+}
+
 void initialize_repository(struct repository *repo)
 {
 	if (repo->initialized)

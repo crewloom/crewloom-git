@@ -255,6 +255,11 @@ void repo_set_compat_hash_algo(struct repository *repo, uint32_t compat_algo);
 void repo_set_ref_storage_format(struct repository *repo,
 				 enum ref_storage_format format,
 				 const char *payload);
+/* Narrow ODB defaults for initialized repositories; this does not enable
+ * general secondary-repository configuration support. */
+int repo_odb_compression_level(struct repository *repo);
+enum object_creation_mode repo_odb_creation_mode(struct repository *repo);
+
 void initialize_repository(struct repository *repo);
 RESULT_MUST_BE_USED
 int repo_init(struct repository *r, const char *gitdir, const char *worktree);

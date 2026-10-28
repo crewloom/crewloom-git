@@ -139,6 +139,7 @@ int is_builtin(const char *s);
 		BUG("unexpected prefix in builtin: %s", (prefix)); \
 } while (0)
 
+int cmd_memory(int argc, const char **argv, const char *prefix, struct repository *repo);
 int cmd_add(int argc, const char **argv, const char *prefix, struct repository *repo);
 int cmd_am(int argc, const char **argv, const char *prefix, struct repository *repo);
 int cmd_annotate(int argc, const char **argv, const char *prefix, struct repository *repo);

@@ -133,6 +133,12 @@ int repo_protect_hfs(struct repository *repo)
 
 int repo_ignore_case(struct repository *repo)
 {
+	if (repo && repo->initialized && repo != the_repository) {
+		int ignore_case = 0;
+		/* Secondary stores use their own config, never the primary values. */
+		repo_config_get_bool(repo, "core.ignorecase", &ignore_case);
+		return ignore_case;
+	}
 	return (repo && repo->initialized) ?
 		repo_config_values(repo)->ignore_case :
 		0;

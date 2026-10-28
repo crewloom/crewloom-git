@@ -1,6 +1,12 @@
 name: CI
 
-on: [push, pull_request]
+# Preserve upstream CI for upstream-maintenance branches. The fork branch and
+# release tags use the explicit native-memory matrix and compatibility suite.
+on:
+  push:
+    branches: [master, maint, next, seen]
+  pull_request:
+    branches: [master, maint, next, seen]
 
 env:
   DEVELOPER: 1

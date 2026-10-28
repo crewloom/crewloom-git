@@ -395,12 +395,11 @@ int finalize_object_file_flags(struct repository *repo,
 {
 	unsigned retries = 0;
 	int ret;
-	struct repo_config_values *cfg = repo_config_values(repo);
 
 retry:
 	ret = 0;
 
-	if (cfg->object_creation_mode == OBJECT_CREATION_USES_RENAMES)
+	if (repo_odb_creation_mode(repo) == OBJECT_CREATION_USES_RENAMES)
 		goto try_rename;
 	else if (link(tmpfile, filename))
 		ret = errno;

@@ -1,0 +1,48 @@
+name: Native memory
+on:
+  push:
+    branches: [crewloom-main]
+    tags: ['crewloom-git-v*']
+  pull_request:
+    branches: [crewloom-main]
+permissions:
+  contents: read
+jobs:
+  documentation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Git manual page tools
+        run: sudo apt-get update && sudo apt-get install -y asciidoc xmlto docbook-xsl
+      - name: Build the new manual page
+        run: make -C Documentation git-memory.1
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build native C fork
+        run: ./scripts/build-memory.sh DEVELOPER=1
+      - name: Native acceptance and upstream compatibility
+        run: ./scripts/test-memory.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: memory-tests-${{ matrix.os }}
+          path: t/test-results/
+  sanitizer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build with address and undefined behavior sanitizers
+        run: ./scripts/build-memory.sh SANITIZE=address,undefined
+      - name: Native memory acceptance under sanitizers
+        run: ./scripts/test-memory.sh --native-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: memory-tests-sanitizers
+          path: t/test-results/

@@ -134,6 +134,7 @@ git-ls-tree                             plumbinginterrogators
 git-mailinfo                            purehelpers
 git-mailsplit                           purehelpers
 git-maintenance                         mainporcelain
+git-memory                              ancillaryinterrogators
 git-merge                               mainporcelain           history
 git-merge-base                          plumbinginterrogators
 git-merge-file                          plumbingmanipulators
