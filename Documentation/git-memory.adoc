@@ -19,6 +19,9 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
+This command is a frozen reference prototype. As of 2026-10-29 no new features
+are added; new work is a change-memory layer on top of an unmodified Git.
+
 This fork adds native C implementation inside Git. Memory operations use Git's
 object and reference APIs directly; capture and retrieval do not execute a shell,
 a model, or another Git process. No executable is installed over the system Git.

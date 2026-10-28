@@ -1,10 +1,64 @@
-# Native project memory in Git: implementation plan
+# Crewloom change memory: implementation plan
+
+Status: direction changed on 2026-10-29. The native builtin released as
+`crewloom-git-v0.1.0` is frozen as a reference prototype. New work is a change-memory
+layer on top of an unmodified, installed Git. No layer code exists yet.
+
+## Decision
+
+Git already stores versions, computes differences and retrieves blobs. Extending a C fork
+of Git duplicates mature work, and every upstream Git release would need a merge, conflict
+resolution and the compatibility suite again. Users would also need a second Git binary.
+The prototype has not shown a context or quota benefit that requires changing Git itself.
+
+The unproven value is selecting the changes relevant to a task and keeping that selection
+current, not storing bytes. That work belongs in a layer that reads Git, so effort moves there.
+
+## What happens to the prototype
+
+- `crewloom-git-v0.1.0` and its tag stay published and are not deleted or rewritten.
+- `crewloom-main` receives no new features. It may receive security or correctness fixes
+  only if a user depends on the prototype; otherwise it is archived after the layer ships.
+- The prototype's acceptance gates and test cases are the reference behavior for the layer:
+  staged versus working bytes, exact byte offsets, private store excluded from clone,
+  mirror push and bundle, declared versus unknown attribution, explicit omissions.
+
+## Layer design (proposed, not built)
+
+- Runs the user's installed `git` through its plumbing commands (`ls-files -s`,
+  `cat-file --batch`, `hash-object -w --stdin`, `mktree`, `commit-tree`, `update-ref`,
+  `diff`, `log`). No changes to Git, its index, HEAD, hooks or the source object database.
+- Keeps snapshots in a separate owner-only bare repository under the worktree's Git
+  directory, as the prototype did, so clone, mirror push and bundle never carry them.
+- Captures staged content from the index and raw working content from files as separate
+  trees, publishing each snapshot with an expected-old-OID ref update.
+- Watches files with the operating system's file events, with polling as the fallback.
+- Builds task context from commits, diffs and snapshots: which paths changed, by whom
+  (declared), and the smallest source-linked excerpts inside a strict byte budget.
+- Attribution fields remain host declarations, never authenticated identity.
+- Placement, language and package owner are an open decision. The layer is expected to
+  live with the Crewloom agents that consume it, not in this fork.
+
+## Measurement gate (first, before building the layer)
+
+1. Freeze a set of real Crewloom tasks with known relevant files.
+2. Baseline: the context an agent gets today from plain `git status`, `git diff` and `git log`.
+3. Candidate: the same tasks with the layer's selected context.
+4. Measure input tokens, cost, task success and missed relevant files for both.
+
+Build the full layer only if the candidate reduces tokens or cost without lowering task
+success. Report the measured numbers as they are, including a negative result.
+
+## Archived: 0.1.0 native prototype plan
+
+The plan below governed the frozen prototype. It is kept unchanged for reference.
+
 
 Status: scope frozen after the scientific council; first implementation is built and its local acceptance suite passed. Remote release remains pending CI.
 Upstream: Git v2.56.0, commit a018953688f1b10bddf91bff8747068f5f4746a4.
 Branch: crewloom-main. The system Git executable is not modified or installed over.
 
-## Council and decision
+### Council and decision
 
 Independent architecture and adversarial reviews examined the upstream source. A separate
 Claude Code call returned canonicalModel=claude-sonnet-5-5 and provider=firstParty, with
@@ -17,7 +71,7 @@ The user requires memory inside Git's native implementation, automatic observed-
 history, explicit attribution and retrieval that avoids sending every source to a model.
 This is not a shell wrapper, model service, or a new file/object format.
 
-## Placement and ownership
+### Placement and ownership
 
 - New native C modules own private storage, capture, retrieval, notes, and diagnostics.
 - builtin/memory.c is a thin native interface registered in Git's builtin dispatcher.
@@ -26,7 +80,7 @@ This is not a shell wrapper, model service, or a new file/object format.
 - No Crewloom proprietary code, prompts, account identifiers or provider dependencies enter this fork.
 - Existing Crewloom Python indexing/context/lessons are not duplicated or integrated by this release.
 
-## Durable storage and privacy
+### Durable storage and privacy
 
 Memory is off until explicit initialization with literal repository-relative tracked paths
 or directory prefixes. The user explicitly selects whether raw worktree versions are retained.
@@ -47,7 +101,7 @@ ref update. Preserve old reachable generations. Do not claim atomicity against e
 Check index/HEAD drift and per-file stability. Lock contention or stale generations are explicit errors.
 A failed or interrupted capture never modifies source index, HEAD or worktree.
 
-## Interface and automatic operation
+### Interface and automatic operation
 
 Native builtin operations: init, capture, status, history, context, diff, note and watch.
 All structured output uses a versioned JSON schema, deterministic ordering, exact source IDs,
@@ -67,7 +121,7 @@ not semantic truth or dependency completeness. No note becomes executable instru
 First release extraction is content/Git facts, bounded source excerpts and byte spans;
 Tree-sitter semantic indexing and a Crewloom host adapter are deferred explicitly.
 
-## Ordered task DAG
+### Ordered task DAG
 
 1. Build unchanged upstream baseline; record exact tools, flags and environment limitations.
 2. Implement independent private-store opening, scope, locks and object/ref publication.
@@ -81,7 +135,7 @@ Tree-sitter semantic indexing and a Crewloom host adapter are deferred explicitl
 Steps 2 and independent test fixtures may run in parallel after this plan; integration follows
 shared interfaces with exclusive file ownership. No UI/site change is required for this native release.
 
-## Acceptance gates
+### Acceptance gates
 
 - Real compiled Git builtin, with no shell/git subprocess in memory modules.
 - Off has no memory artifacts; existing init/add/status/worktree behavior retains its contract.
@@ -100,7 +154,7 @@ shared interfaces with exclusive file ownership. No UI/site change is required f
 Tests not run or unavailable sanitizer/build variants must remain explicit in release notes.
 No release with known failing acceptance checks or failing remote CI is considered complete.
 
-## Implementation result (2026-10-28)
+### Implementation result (2026-10-28)
 
 The native builtin and documentation are implemented in this fork. The local
 `DEVELOPER=1` build passed; `scripts/test-memory.sh` passed all 23 behavior tests,

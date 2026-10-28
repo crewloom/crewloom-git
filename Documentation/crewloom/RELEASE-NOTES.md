@@ -1,3 +1,13 @@
+# Crewloom Git 0.1.1 — Prototype frozen
+
+Documentation only; no code changes from 0.1.0. On 2026-10-29 the native builtin was
+frozen as a reference prototype. New work moves to a change-memory layer on top of an
+unmodified, installed Git, gated on measuring token and cost savings on real tasks
+first. See `IMPLEMENTATION-PLAN.md`.
+
+بالعربية: تحديث للوثائق فقط، دون تغيير في الكود. الأمر الأصلي أصبح نموذجًا أوليًا
+مجمدًا، والعمل الجديد طبقة فوق Git المثبت بعد قياس توفير الرموز والتكلفة على مهام حقيقية.
+
 # Crewloom Git 0.1.0 — Native project memory
 
 This release adds a native Git builtin for a private, local, versioned project
