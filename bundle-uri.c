@@ -448,9 +448,9 @@ static int unbundle_from_file(struct repository *r, const char *file)
 		strbuf_setlen(&bundle_ref, bundle_prefix_len);
 		strbuf_addstr(&bundle_ref, branch_name);
 
-		has_old = !refs_read_ref(get_main_ref_store(the_repository),
+		has_old = !refs_read_ref(get_main_ref_store(r),
 					 bundle_ref.buf, &old_oid);
-		refs_update_ref(get_main_ref_store(the_repository),
+		refs_update_ref(get_main_ref_store(r),
 				"fetched bundle", bundle_ref.buf, oid,
 				has_old ? &old_oid : NULL,
 				0, UPDATE_REFS_MSG_ON_ERR);
@@ -859,7 +859,7 @@ int fetch_bundle_uri(struct repository *r, const char *uri,
 		.id = xstrdup(""),
 	};
 
-	trace2_region_enter("fetch", "fetch-bundle-uri", the_repository);
+	trace2_region_enter("fetch", "fetch-bundle-uri", r);
 
 	init_bundle_list(&list);
 
@@ -886,7 +886,7 @@ cleanup:
 	for_all_bundles_in_list(&list, unlink_bundle, NULL);
 	clear_bundle_list(&list);
 	clear_remote_bundle_info(&bundle, NULL);
-	trace2_region_leave("fetch", "fetch-bundle-uri", the_repository);
+	trace2_region_leave("fetch", "fetch-bundle-uri", r);
 	return result;
 }
 
