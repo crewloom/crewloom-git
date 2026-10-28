@@ -1,3 +1,14 @@
+# Crewloom Git 0.1.2 — Release script fix
+
+Release tooling only; the Git builtin is unchanged from 0.1.0. `scripts/release.sh`
+now polls for each push's CI runs instead of checking once after 3 seconds, matches
+runs to the pushed branch or tag, and waits only on the `Native memory` workflow.
+Upstream workflows report `skipped`, which `gh run watch --exit-status` treats as a
+failure. The 0.1.1 release stopped before tagging because of the 3-second check.
+
+بالعربية: إصلاح في أداة الإصدار فقط. السكربت ينتظر ظهور تشغيلات CI لكل فرع أو tag
+بدل فحص واحد بعد 3 ثوانٍ، ويتابع سير عمل `Native memory` وحده.
+
 # Crewloom Git 0.1.1 — Prototype frozen
 
 Documentation only; no code changes from 0.1.0. On 2026-10-29 the native builtin was
