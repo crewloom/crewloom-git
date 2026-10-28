@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-26]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -28,7 +28,7 @@ jobs:
         run: ./scripts/build-memory.sh DEVELOPER=1
       - name: Native acceptance and upstream compatibility
         run: ./scripts/test-memory.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: memory-tests-${{ matrix.os }}
@@ -41,7 +41,7 @@ jobs:
         run: ./scripts/build-memory.sh SANITIZE=address,undefined
       - name: Native memory acceptance under sanitizers
         run: ./scripts/test-memory.sh --native-only
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: memory-tests-sanitizers
