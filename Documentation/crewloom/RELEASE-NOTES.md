@@ -5,6 +5,9 @@ frozen as a reference prototype. New work moves to a change-memory layer on top 
 unmodified, installed Git, gated on measuring token and cost savings on real tasks
 first. See `IMPLEMENTATION-PLAN.md`.
 
+CI: the macOS job runs on `macos-15`, because `macos-26` jobs were cancelled
+without a runner being assigned.
+
 بالعربية: تحديث للوثائق فقط، دون تغيير في الكود. الأمر الأصلي أصبح نموذجًا أوليًا
 مجمدًا، والعمل الجديد طبقة فوق Git المثبت بعد قياس توفير الرموز والتكلفة على مهام حقيقية.
 
